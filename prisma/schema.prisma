@@ -14,6 +14,7 @@ model User {
   id              Int       @id                       @default(autoincrement())
   name            String
   username        String    @unique
+  email           String    @unique
   passwordHashed  String
   avatar          String    @default("")
   followedBy      User[]    @relation("UserFollows")

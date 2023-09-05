@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { Controller } from './Controller'
-import { DBRepository } from '../db/DBRepository'
+import { Controller } from '../Controller'
+import { DBRepository } from '../../db/DBRepository'
 
 export class GetAllUsersController implements Controller {
   private readonly db: DBRepository
