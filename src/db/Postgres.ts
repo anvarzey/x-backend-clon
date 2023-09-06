@@ -1,6 +1,16 @@
 import { Prisma, PrismaClient, User } from '@prisma/client'
-import { DBRepository } from './DBRepository'
+import { DBRepository, LoginProps, RegisterUserProps } from './DBRepository'
 import CONSTANTS from '../utils/constants'
+
+interface IUser {
+  id: number
+  name: string
+  username: string
+  email: string
+  passwordHashed: string
+  avatar: string
+  createdAt: Date
+}
 
 export class Postgres implements DBRepository {
   private readonly prisma
@@ -9,7 +19,7 @@ export class Postgres implements DBRepository {
     this.prisma = new PrismaClient()
   }
 
-  public async registerUser ({ name, email, username, passwordHashed }: { name: string, email: string, username: string, passwordHashed: string }): Promise<string | Error> {
+  public async registerUser ({ name, email, username, passwordHashed }: RegisterUserProps): Promise<string | Error> {
     try {
       await this.prisma.user.create({
         data: {
@@ -64,5 +74,19 @@ export class Postgres implements DBRepository {
     } catch (e) {
       return new Error('Internal error')
     }
+  }
+
+  public async login (props: LoginProps): Promise<string | IUser> {
+    const { username } = props
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username
+      }
+    })
+
+    if (user === null) return CONSTANTS.NOT_FOUND
+
+    return user
   }
 }

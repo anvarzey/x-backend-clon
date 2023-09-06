@@ -17,16 +17,19 @@ model User {
   email           String    @unique
   passwordHashed  String
   avatar          String    @default("")
+  tweets          Tweet[]
   followedBy      User[]    @relation("UserFollows")
   following       User[]    @relation("UserFollows")
   createdAt       DateTime  @default(now())
-  likes           Tweet[]
+  likes           Tweet[]   @relation("UserLikes")
 }
 
 model Tweet {
   id             Int      @id               @default(autoincrement())
   content        String   @db.VarChar(280)
-  likedBy        User[]
+  authorId       Int
+  author         User     @relation(fields: [authorId], references: [id])
+  likedBy        User[]   @relation("UserLikes")
   commentId      Int?
   commentTo      Tweet?   @relation("Comment", fields: [commentId], references: [id])
   comments       Tweet[]  @relation("Comment")

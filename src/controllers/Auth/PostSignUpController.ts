@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { DBRepository } from '../../db/DBRepository'
 import { Controller } from '../Controller'
-import hashPassword from '../../utils/hashPassword'
+import { hashPassword } from '../../utils/handlePassword'
 
 export class PostSignUpController implements Controller {
   private readonly db: DBRepository

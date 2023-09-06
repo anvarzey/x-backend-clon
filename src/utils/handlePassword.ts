@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 
-const hashPassword = async (password: string): Promise<string | Error> => {
+export const hashPassword = async (password: string): Promise<string | Error> => {
   const { SALT_ROUNDS } = process.env
 
   if (SALT_ROUNDS === undefined) {
@@ -14,4 +14,8 @@ const hashPassword = async (password: string): Promise<string | Error> => {
   return passwordHashed
 }
 
-export default hashPassword
+export const verifyPassword = async (password: string, hashedPassword: string): Promise<boolean> => {
+  const result = await bcrypt.compare(password, hashedPassword)
+
+  return result
+}
