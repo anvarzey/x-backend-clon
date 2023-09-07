@@ -13,7 +13,9 @@ export class PostRefreshTokenController implements Controller {
       const tokens = await getTokens(payload)
 
       res.json(tokens)
-    } catch (error) {
+    } catch (e) {
+      console.error(e)
+
       res.status(401).end()
     }
   }

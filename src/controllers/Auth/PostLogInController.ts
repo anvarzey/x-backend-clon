@@ -45,17 +45,20 @@ export class PostLogInController implements Controller {
         return
       }
 
-      const tokens = await getTokens({ avatar: user.avatar, name: user.name, username: user.username })
-
-      /*
-        ADD REDIS TO STORE REFRESH TOKENS
-      */
+      const tokens = await getTokens({ avatar: user.avatar, id: user.id.toString(), name: user.name, username: user.username })
 
       // const tokens = await getTokens({ avatar, name, username })
 
-      res.status(200).json({ data: tokens })
+      res.cookie('jwt', tokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 1000 * 60 * 60 * 24 * 7
+      })
+
+      res.status(200).json({ data: tokens.accessToken })
     } catch (e) {
-      res.status(500)
+      res.status(500).end()
     }
   }
 }

@@ -22,6 +22,15 @@ model User {
   following       User[]    @relation("UserFollows")
   createdAt       DateTime  @default(now())
   likes           Tweet[]   @relation("UserLikes")
+  refreshTokens   RefreshToken[]
+}
+
+model RefreshToken {
+  userId  Int
+  user    User    @relation(fields: [userId], references: [id])
+  value   String
+
+  @@id([userId, value])
 }
 
 model Tweet {

@@ -14,7 +14,26 @@ export interface LoginProps {
   password: string
 }
 
-interface IUser {
+export interface TweetProps {
+  authorId: string
+  commentId?: string
+  tweetContent: string
+}
+
+export interface ITokenUser {
+  id: number
+  name: string
+  username: string
+}
+
+export interface ITweet {
+  id: number
+  content: string
+  commentId: number | null
+  authorId: number
+}
+
+export interface IUser {
   id: number
   name: string
   username: string
@@ -30,4 +49,7 @@ export interface DBRepository {
   getUser: (id: string) => Promise<void>
   checkEmail: (email: string) => Promise<string | Error>
   login: (props: LoginProps) => Promise<string | IUser>
+  createTweet: (props: TweetProps) => Promise<string | Error>
+  getTweets: () => Promise<ITweet[] | Error>
+  verifyRefreshToken: (refreshToken: string) => Promise<ITokenUser | Error>
 }

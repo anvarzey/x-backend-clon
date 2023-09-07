@@ -1,5 +1,7 @@
 import express from 'express'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import dotenv from 'dotenv'
 import { Router } from './routes/router'
 import { DBRepository } from './db/DBRepository'
 
@@ -15,7 +17,10 @@ export class Server {
     this.port = port
     this.router = new Router(this.db)
 
+    dotenv.config()
+
     this.express.use(express.json())
+    this.express.use(cookieParser())
     this.express.use(cors())
     this.express.use('/api', this.router.send())
   }

@@ -22,7 +22,9 @@ export class PostCheckEmailController implements Controller {
       } else {
         throw new Error('Error')
       }
-    } catch (error) {
+    } catch (e) {
+      console.error(e)
+
       res.json({ error: 'Error when checking email' })
     }
   }

@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { DBRepository } from '../../db/DBRepository'
 import { Controller } from '../Controller'
 
-export class PatchUserController implements Controller {
+export class GetTweetsController implements Controller {
   private readonly db: DBRepository
 
   constructor (db: DBRepository) {
@@ -10,11 +10,13 @@ export class PatchUserController implements Controller {
   }
 
   async run (req: Request, res: Response): Promise<void> {
-    const { name, username, passwordHashed, avatar } = req.body
-    const { id } = req.params
+    try {
+      const result = await this.db.getTweets()
 
-    console.log({ id, name, username, passwordHashed, avatar })
-
-    res.status(200).end()
+      res.json({ data: result })
+    } catch (e) {
+      console.error(e)
+      res.status(500).end()
+    }
   }
 }

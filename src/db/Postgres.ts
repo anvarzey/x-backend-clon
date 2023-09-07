@@ -1,16 +1,6 @@
 import { Prisma, PrismaClient, User } from '@prisma/client'
-import { DBRepository, LoginProps, RegisterUserProps } from './DBRepository'
+import { DBRepository, ITokenUser, ITweet, IUser, LoginProps, RegisterUserProps, TweetProps } from './DBRepository'
 import CONSTANTS from '../utils/constants'
-
-interface IUser {
-  id: number
-  name: string
-  username: string
-  email: string
-  passwordHashed: string
-  avatar: string
-  createdAt: Date
-}
 
 export class Postgres implements DBRepository {
   private readonly prisma
@@ -30,7 +20,7 @@ export class Postgres implements DBRepository {
         }
       })
 
-      return 'Ok'
+      return CONSTANTS.OK
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
@@ -88,5 +78,50 @@ export class Postgres implements DBRepository {
     if (user === null) return CONSTANTS.NOT_FOUND
 
     return user
+  }
+
+  public async createTweet (props: TweetProps): Promise<string | Error> {
+    const { tweetContent, authorId, commentId } = props
+
+    try {
+      if (commentId === undefined || commentId === null) {
+        await this.prisma.tweet.create({
+          data: {
+            content: tweetContent,
+            authorId: Number(authorId)
+          }
+        })
+      } else {
+        await this.prisma.tweet.create({
+          data: {
+            content: tweetContent,
+            authorId: Number(authorId),
+            commentId: Number(commentId)
+          }
+        })
+      }
+
+      return CONSTANTS.OK
+    } catch (e) {
+      console.error(e)
+      return new Error(CONSTANTS.GENERIC_ERROR)
+    }
+  }
+
+  public async getTweets (): Promise<Error | ITweet[]> {
+    try {
+      const result = await this.prisma.tweet.findMany()
+
+      return result
+    } catch (e) {
+      if (e instanceof Error) {
+        return new Error(e.message)
+      }
+      return new Error(CONSTANTS.GENERIC_ERROR)
+    }
+  }
+
+  public async verifyRefreshToken (refreshToken: string): Promise<ITokenUser | Error> {
+    return new Error('')
   }
 }
