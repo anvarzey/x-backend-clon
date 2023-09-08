@@ -12,8 +12,17 @@ export class GetRefreshTokenController implements Controller {
   }
 
   async run (req: Request, res: Response): Promise<void> {
-    const { refreshToken } = req.cookies
+    const cookies = req.cookies
+
+    if (!cookies?.jwt) {
+      res.status(401).end()
+      return
+    }
+
+    const refreshToken = cookies.jwt
+
     res.clearCookie('jwt', { httpOnly: true, secure: true })
+
     try {
       const payload = await verifyRefreshToken(refreshToken)
 
