@@ -1,15 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import { Middleware } from '../Middleware'
 import { verifyAccessToken } from '../../utils/handleToken'
-import { DBRepository } from '../../db/DBRepository'
 
 export class AuthenticationMiddleware implements Middleware {
-  private readonly db: DBRepository
-
-  constructor (db: DBRepository) {
-    this.db = db
-  }
-
   async run (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { authorization } = req.headers
 
@@ -22,11 +15,10 @@ export class AuthenticationMiddleware implements Middleware {
     try {
       const result = await verifyAccessToken(token)
 
-      if (!(result instanceof Error)) {
-        next()
+      if (result instanceof Error) {
+        res.status(401).end()
       }
-
-      // this.db.verifyRefreshToken
+      next()
     } catch (e) {
       console.error(e)
       res.status(401).end()

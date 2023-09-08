@@ -4,16 +4,7 @@ import { Controller } from '../Controller'
 import { verifyPassword } from '../../utils/handlePassword'
 import CONSTANTS from '../../utils/constants'
 import { getTokens } from '../../utils/handleToken'
-
-interface IUser {
-  id: number
-  name: string
-  username: string
-  email: string
-  passwordHashed: string
-  avatar: string
-  createdAt: Date
-}
+import { User } from '@prisma/client'
 
 export class PostLogInController implements Controller {
   private readonly db: DBRepository
@@ -24,8 +15,7 @@ export class PostLogInController implements Controller {
 
   async run (req: Request, res: Response): Promise<void> {
     const { username, email, password } = req.body
-    // const { username, avatar, name } = req.body
-    let user: IUser | string
+    let user: User | string
     try {
       if (username !== undefined) {
         user = await this.db.login({ username, password })
@@ -52,7 +42,7 @@ export class PostLogInController implements Controller {
       res.cookie('jwt', tokens.refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
+        // sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24 * 7
       })
 

@@ -1,13 +1,6 @@
 import jwt from 'jsonwebtoken'
 import CONSTANTS from './constants'
 
-interface Payload {
-  id: string
-  avatar: string
-  name: string
-  username: string
-}
-
 interface Tokens {
   accessToken: string
   refreshToken: string
@@ -26,7 +19,7 @@ export const getTokens = async (payload: Payload): Promise<Tokens> => {
   }
 }
 
-export const refreshTokenFn = async (refreshToken: string): Promise<Payload | Error> => {
+export const verifyRefreshToken = async (refreshToken: string): Promise<Payload | Error> => {
   const { REFRESH_TOKEN_SECRET } = process.env
 
   if (REFRESH_TOKEN_SECRET === undefined) return new Error('Forbidden')
@@ -34,9 +27,9 @@ export const refreshTokenFn = async (refreshToken: string): Promise<Payload | Er
   const userInfo: any = await jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, (err, payload) => {
     if (err !== null && err !== undefined) return new Error('Anauthorized')
 
-    const { avatar, name, username } = payload as Payload
+    const { avatar, id, name, username } = payload as Payload
 
-    return { avatar, name, username }
+    return { avatar, id, name, username }
   })
 
   return userInfo
@@ -69,20 +62,3 @@ export const verifyAccessToken = async (accessToken: string): Promise<string | E
     return new Error(CONSTANTS.GENERIC_ERROR)
   }
 }
-
-// export const verifyRefreshToken = async (refreshToken: string): Promise<string | Error> => {
-//   const { REFRESH_TOKEN_SECRET } = process.env
-
-//   if (REFRESH_TOKEN_SECRET === undefined) {
-//     return new Error(CONSTANTS.INTERNAL_ERROR)
-//   }
-
-//   try {
-//     return ''
-//   } catch (e) {
-//     if (e instanceof Error) {
-//       return new Error(e.message)
-//     }
-//     return new Error(CONSTANTS.GENERIC_ERROR)
-//   }
-// }

@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient, User } from '@prisma/client'
-import { DBRepository, ITokenUser, ITweet, IUser, LoginProps, RegisterUserProps, TweetProps } from './DBRepository'
+import { DBRepository, Tweet, LoginProps, RegisterUserProps, TweetProps, VerifyRTInDbRes } from './DBRepository'
 import CONSTANTS from '../utils/constants'
 
 export class Postgres implements DBRepository {
@@ -66,7 +66,7 @@ export class Postgres implements DBRepository {
     }
   }
 
-  public async login (props: LoginProps): Promise<string | IUser> {
+  public async login (props: LoginProps): Promise<string | User> {
     const { username } = props
 
     const user = await this.prisma.user.findUnique({
@@ -108,7 +108,7 @@ export class Postgres implements DBRepository {
     }
   }
 
-  public async getTweets (): Promise<Error | ITweet[]> {
+  public async getTweets (): Promise<Error | Tweet[]> {
     try {
       const result = await this.prisma.tweet.findMany()
 
@@ -121,7 +121,81 @@ export class Postgres implements DBRepository {
     }
   }
 
-  public async verifyRefreshToken (refreshToken: string): Promise<ITokenUser | Error> {
-    return new Error('')
+  public async verifyRefreshTokenInDb (refreshToken: string, userId: string): Promise<VerifyRTInDbRes> {
+    try {
+      const isInDb = await this.prisma.refreshToken.findUnique({
+        where: {
+          userId_value: {
+            userId: Number(userId),
+            value: refreshToken
+          }
+        }
+      })
+
+      if (!isInDb) {
+        const fromOtherUser = await this.prisma.refreshToken.findFirst({
+          where: {
+            value: refreshToken
+          }
+        })
+        if (fromOtherUser) {
+          return {
+            success: false,
+            error: CONSTANTS.WRONG_OWNER,
+            ownerId: fromOtherUser.userId.toString()
+          }
+        }
+
+        return {
+          success: false,
+          error: CONSTANTS.NOT_FOUND
+        }
+      }
+
+      return { success: true }
+    } catch (e) {
+      console.error(e)
+      return {
+        success: false,
+        error: CONSTANTS.INTERNAL_ERROR
+      }
+    }
+  }
+
+  public async clearRefreshTokens (userId: string): Promise<string | Error> {
+    try {
+      const result = await this.prisma.refreshToken.deleteMany({
+        where: {
+          userId: Number(userId)
+        }
+      })
+
+      if (result instanceof Error) throw new Error(result.message)
+
+      return CONSTANTS.OK
+    } catch (e) {
+      console.error(e)
+      if (e instanceof Error) {
+        return new Error(e.message)
+      }
+      return new Error(CONSTANTS.INTERNAL_ERROR)
+    }
+  }
+
+  public async addRefreshToken (userId: string, refreshToken: string): Promise<string | Error> {
+    try {
+      await this.prisma.refreshToken.create({
+        data: {
+          userId: Number(userId),
+          value: refreshToken
+        }
+      })
+
+      return CONSTANTS.OK
+    } catch (e) {
+      console.error(e)
+
+      return new Error('Internal error')
+    }
   }
 }

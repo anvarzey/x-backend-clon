@@ -5,7 +5,7 @@ import { GetUserController } from '../controllers/User/GetUserController'
 import { PatchUserController } from '../controllers/User/PatchUserController'
 import { PostSignUpController } from '../controllers/Auth/PostSignUpController'
 import { PostLogInController } from '../controllers/Auth/PostLogInController'
-import { PostRefreshTokenController } from '../controllers/Auth/PostRefreshTokenController'
+import { GetRefreshTokenController } from '../controllers/Auth/GetRefreshTokenController'
 import { PostTweetController } from '../controllers/Tweet/PostTweetController'
 import { GetTweetsController } from '../controllers/Tweet/GetTweetsController'
 import { AuthenticationMiddleware } from '../middlewares/Auth/AuthenticationMiddleware'
@@ -18,7 +18,7 @@ export class Router {
   private readonly patchUserController
   private readonly postSignUpController
   private readonly postLogInController
-  private readonly postRefreshTokenController
+  private readonly getRefreshTokenController
   private readonly postTweetController
   private readonly getTweetsController
   private readonly authenticationMiddleware
@@ -32,7 +32,7 @@ export class Router {
 
     this.postSignUpController = new PostSignUpController(this.db)
     this.postLogInController = new PostLogInController(this.db)
-    this.postRefreshTokenController = new PostRefreshTokenController()
+    this.getRefreshTokenController = new GetRefreshTokenController(this.db)
 
     this.postTweetController = new PostTweetController(this.db)
     this.getTweetsController = new GetTweetsController(this.db)
@@ -45,7 +45,7 @@ export class Router {
 
     this.router.post('/auth/signup', async (req: Request, res: Response) => await this.postSignUpController.run(req, res))
     this.router.post('/auth/login', async (req: Request, res: Response) => await this.postLogInController.run(req, res))
-    this.router.post('/auth/refresh', async (req: Request, res: Response) => await this.postRefreshTokenController.run(req, res))
+    this.router.get('/auth/refresh', async (req: Request, res: Response) => await this.getRefreshTokenController.run(req, res))
 
     this.router.post('/tweet', this.authenticationMiddleware.run, async (req: Request, res: Response) => await this.postTweetController.run(req, res))
     this.router.get('/tweet', async (req: Request, res: Response) => await this.getTweetsController.run(req, res))
